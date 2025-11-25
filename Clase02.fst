@@ -113,11 +113,13 @@ let ex_falso (#a:Type) (f : falso) : a =
 
 (* Demostrar *)
 let neu1 (#a:Type) : oo a falso -> a =
-  admit()
+  function
+  | Inl x -> x
+  | Inr falso -> falso
 
 (* Demostrar *)
 let neu2 (#a:Type) : a -> oo a falso =
-  admit()
+  fun (x:a) -> Inl x
 
 (* Distribución de `yy` sobre `oo`, en ambas direcciones *)
 let distr_yyoo_1 (#a #b #c : Type)
@@ -133,50 +135,69 @@ let distr_yyoo_1 (#a #b #c : Type)
 let distr_yyoo_2 (#a #b #c : Type)
   : oo (yy a b) (yy a c) -> yy a (oo b c)
 =
-  admit()
+  function
+  | Inl (x,y) -> (x, Inl y)
+  | Inr (x,y) -> (x, Inr y)
 
 let distr_ooyy_1 (#a #b #c : Type)
   : oo a (yy b c) -> yy (oo a b) (oo a c)
 =
-  admit()
+  function
+  | Inl x -> (Inl x, Inl x)
+  | Inr (x,y) -> (Inr x, Inr y)
 
 let distr_ooyy_2 (#a #b #c : Type)
   : yy (oo a b) (oo a c) -> oo a (yy b c)
 =
-  admit()
+  function
+  | (Inl x,  _  ) -> Inl x
+  | (Inr y,Inl x) -> Inl x
+  | (Inr y,Inr z) -> Inr (y,z) 
 
 let modus_tollens (#a #b : Type)
   : (a -> b) -> (no b -> no a)
 =
-  admit()
+  fun ab nb a -> nb (ab a)
   (* Vale la recíproca? *)
 
 let modus_tollendo_ponens (#a #b : Type)
   : (oo a b) -> (no a -> b)
 =
-  admit()
+  fun aob na ->
+    match aob with
+    | Inl a -> na a
+    | Inr b -> b
   (* Vale la recíproca? *)
 
 let modus_ponendo_tollens (#a #b : Type)
   : no (yy a b) -> (a -> no b)
 =
-  admit()
+  fun nayb a b -> nayb (a, b)
   (* Vale la recíproca? *)
 
 (* Declare y pruebe, si es posible, las leyes de De Morgan
 para `yy` y `oo`. ¿Son todas intuicionistas? *)
 
 let demorgan1_ida (#a #b : Type) : oo (no a) (no b) -> no (yy a b) =
-  admit()
+  function
+  | Inl na -> fun ayb -> na (fst ayb) 
+  | Inr nb -> fun ayb -> nb (snd ayb) 
 
 let demorgan1_vuelta (#a #b : Type) : no (yy a b) -> oo (no a) (no b) =
   admit()
+//  No es contructiva en lógica intuicionista
 
 let demorgan2_ida (#a #b : Type) : yy (no a) (no b) -> no (oo a b) =
-  admit()
+  fun naynb aob ->
+  match aob with
+  | Inl a -> fst naynb a
+  | Inr b -> snd naynb b
 
 let demorgan2_vuelta (#a #b : Type) : no (oo a b) -> yy (no a) (no b) =
-  admit()
+  fun naob -> 
+  let na : no a = fun a -> naob (Inl a) in
+  let nb : no b = fun a -> naob (Inl a) in (na, nb)
+
 
 
  (* P y no P no pueden valer a la vez. *)

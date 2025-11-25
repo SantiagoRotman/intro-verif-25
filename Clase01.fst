@@ -56,34 +56,64 @@ let max2 (x y : int) : z:int{(z=x||z=y) && (z>=x && z>=y)} = if x > y then x els
 
 (* Defina la función de fibonacci, de enteros a enteros,
 o alguna restricción apropiada. *)
-let rec fib (x:int) : int = if x <= 1 then x else fib(x-1) + fib(x-2)
+let rec fib (x:int) : int = 
+   if x <= 0 then 0 
+   else (if x = 1 then 1 else fib(x-1) + fib(x-2))
  
 (* Defina un tipo 'digito' de naturales de un sólo dígito. *)
-// type digito =
+type digito = x:nat{x < 10}
 
 (* Defina una función que compute el máximo de tres dígitos, usando
 alguna definición anterior. El resultado debe ser de tipo digito.
 ¿Por qué funciona esto? ¿De cuáles partes anteriores del archivo
 depende, exactamente? *)
-// let max_digito (x y z : digito) : digito =
+let max_digito (x y z : digito) : digito = max z (max x y)
+// Funciona porque digito es un subtipo de nat que a su vez es un subtipo de int,
+// y la funcion max devuelve alguna de sus entradas, que son digitos.
 
 (* Defina la función factorial. ¿Puede darle un mejor tipo? *)
-let fac (x:int) : int = admit()
+let rec fac (x:int) : int =  
+  if x <= 0 then 1
+  else x * fac (x - 1)
+  
+let rec fac2 (x:nat) : z:nat{z>0} =  
+  if x = 0 then 1
+  else x * fac2 (x - 1)
 
 (* Defina una función que sume los números naturales de 0 a `n`. *)
-let triang (n:nat) : nat = admit()
+let rec triang (n:nat) : nat =  
+  if n = 0 then 0
+  else n + triang (n - 1)
 
 (* Intente darle un tipo a fib que diga que el resultado es siempre
 mayor o igual al argumento. Si el chequeo falla, dé hipótesis de por qué. *)
-//let fib' : ... = ...
+[@@expect_failure]
+let rec fib' (x:int) : z:int{z>=x} =    
+   if x <= 0 then 0 
+   else (if x = 1 then 1 else fib'(x-1) + fib'(x-2))
+// falla porque fib 2 = 1
 
 (* Idem para la función factorial. *)
-//let fac' : ... = ...
+let rec fac' (x:nat) : z:nat{z>0 && z>=x} =  
+  if x = 0 then 1
+  else x * fac' (x - 1)
 
 (* Defina la siguiente función que suma una lista de enteros. *)
 val sum_int : list int -> int
-let sum_int xs = admit()
+let rec sum_int xs = 
+match xs with
+| [] -> 0
+| y::ys -> y + sum_int ys
 
 (* Defina la siguiente función que revierte una lista de enteros. *)
+val append : list int -> list int -> list int
+let rec append l1 l2
+= match l1 with
+| [] -> l2
+| hd :: tl -> hd :: append tl l2
+
 val rev_int : list int -> list int
-let rev_int xs = admit()
+let rec rev_int xs = 
+match xs with
+| [] -> []
+| y::ys -> append (rev_int ys) [y]
